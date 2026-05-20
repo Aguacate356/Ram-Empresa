@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RAM Factory – Iniciar Sesión</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body { background: #0d1117; min-height: 100vh; display:flex; align-items:center; justify-content:center; }
+        .login-card { background:#161b22; border:1px solid #30363d; border-radius:16px; padding:2.5rem; width:100%; max-width:420px; }
+        .brand-icon { font-size:3rem; color:#2ea043; }
+        .form-control { background:#0d1117; border-color:#30363d; color:#e6edf3; }
+        .form-control:focus { background:#0d1117; border-color:#2ea043; color:#e6edf3; box-shadow:0 0 0 3px rgba(46,160,67,.25); }
+        .form-label { color:#8b949e; }
+        .btn-login { background:#2ea043; border:none; font-weight:600; letter-spacing:.5px; }
+        .btn-login:hover { background:#3fb950; }
+        .chip-deco { font-size:.75rem; color:#444c56; letter-spacing:.1em; text-transform:uppercase; }
+        .alert { font-size:.875rem; }
+    </style>
+</head>
+<body>
+<div class="login-card shadow-lg">
+    <div class="text-center mb-4">
+        <div class="brand-icon mb-2"><i class="fas fa-microchip"></i></div>
+        <h3 class="fw-bold text-white mb-0">RAM Factory</h3>
+        <p class="chip-deco mt-1">Manager Inteligente de Producción</p>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% for cat, msg in messages %}
+        <div class="alert alert-{{ cat }} py-2">{{ msg }}</div>
+        {% endfor %}
+    {% endwith %}
+
+    <form method="POST" action="{{ url_for('auth.login') }}">
+        <div class="mb-3">
+            <label class="form-label"><i class="fas fa-envelope me-1"></i>Correo electrónico</label>
+            <input type="email" name="email" class="form-control" placeholder="usuario@ramfactory.com" required>
+        </div>
+        <div class="mb-4">
+            <label class="form-label"><i class="fas fa-lock me-1"></i>Contraseña</label>
+            <input type="password" name="password" class="form-control" placeholder="••••••••" required>
+        </div>
+        <button type="submit" class="btn btn-login btn-primary w-100 py-2">
+            <i class="fas fa-sign-in-alt me-2"></i>Iniciar Sesión
+        </button>
+    </form>
+
+    <div class="text-center mt-4">
+        <small class="text-muted">Admin: admin@ramfactory.com / admin123</small><br>
+        <small class="text-muted">User: user@ramfactory.com / admin123</small>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

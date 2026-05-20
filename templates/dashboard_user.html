@@ -1,0 +1,148 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard – RAM Factory{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="fw-bold mb-0"><i class="fas fa-chart-bar me-2 text-primary"></i>Dashboard Operativo</h4>
+    <span class="badge bg-secondary">Usuario: {{ current_user.nombre }}</span>
+</div>
+
+<!-- KPIs -->
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm text-center p-3" style="border-top:4px solid #2ea043 !important;">
+            <i class="fas fa-industry fa-2x text-success mb-2"></i>
+            <h2 class="fw-bold">{{ prod_hoy }}</h2>
+            <p class="text-muted mb-0">Unidades producidas hoy</p>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm text-center p-3" style="border-top:4px solid #1f6feb !important;">
+            <i class="fas fa-boxes fa-2x text-primary mb-2"></i>
+            <h2 class="fw-bold">{{ inventario|length }}</h2>
+            <p class="text-muted mb-0">Materiales en inventario</p>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm text-center p-3" style="border-top:4px solid #8957e5 !important;">
+            <i class="fas fa-robot fa-2x mb-2" style="color:#8957e5;"></i>
+            <h2 class="fw-bold">IA</h2>
+            <p class="text-muted mb-0"><a href="{{ url_for('ia.chat') }}">Consultar asistente</a></p>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <!-- Mini gráfico -->
+    <div class="col-md-6">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-transparent border-0 fw-semibold">
+                <i class="fas fa-chart-line me-2 text-primary"></i>Producción Últimos 7 Días
+            </div>
+            <div class="card-body"><canvas id="chartSemana" height="160"></canvas></div>
+        </div>
+    </div>
+    <!-- Top 3 -->
+    <div class="col-md-6">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-transparent border-0 fw-semibold">
+                <i class="fas fa-trophy me-2 text-warning"></i>Top Productos del Mes
+            </div>
+            <div class="card-body">
+                {% for p in top3 %}
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span>{{ loop.index }}. {{ p.nombre }}</span>
+                    <span class="badge bg-primary">{{ p.total }} uds.</span>
+                </div>
+                <div class="progress mb-3" style="height:6px;">
+                    <div class="progress-bar bg-primary" style="width:{{ [(p.total / (top3[0].total or 1)) * 100, 100]|min }}%"></div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Últimos registros -->
+<div class="row g-3 mb-4">
+    <div class="col-12">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-transparent border-0 fw-semibold">
+                <i class="fas fa-history me-2"></i>Últimos Registros de Producción
+            </div>
+            <div class="card-body p-0">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light"><tr>
+                        <th>Fecha</th><th>Producto</th><th>Línea</th><th>Turno</th><th>Cantidad</th>
+                    </tr></thead>
+                    <tbody>
+                    {% for r in recientes %}
+                    <tr>
+                        <td>{{ r.fecha }}</td>
+                        <td>{{ r.producto }}</td>
+                        <td>{{ r.linea }}</td>
+                        <td><span class="badge bg-secondary">{{ r.turno }}</span></td>
+                        <td><strong>{{ r.cantidad }}</strong></td>
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Inventario -->
+<div class="row g-3">
+    <div class="col-12">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-transparent border-0 fw-semibold">
+                <i class="fas fa-boxes me-2 text-warning"></i>Estado del Inventario
+            </div>
+            <div class="card-body p-0">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light"><tr><th>Material</th><th>Stock</th><th>Unidad</th><th>Estado</th></tr></thead>
+                    <tbody>
+                    {% for i in inventario %}
+                    <tr>
+                        <td>{{ i.nombre }}</td>
+                        <td>{{ i.stock_actual }}</td>
+                        <td>{{ i.unidad }}</td>
+                        <td>
+                            {% if i.bajo_stock %}
+                            <span class="badge bg-danger">Bajo Stock</span>
+                            {% else %}
+                            <span class="badge bg-success">OK</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const semanaData = {{ prod_semana | safe }};
+new Chart(document.getElementById('chartSemana'), {
+    type: 'line',
+    data: {
+        labels: semanaData.map(r => r.fecha),
+        datasets: [{
+            label: 'Unidades',
+            data: semanaData.map(r => r.total),
+            borderColor: '#2ea043',
+            backgroundColor: 'rgba(46,160,67,.1)',
+            fill: true,
+            tension: 0.4,
+            pointRadius: 4
+        }]
+    },
+    options: { plugins:{ legend:{ display:false } }, scales:{ y:{ beginAtZero:true } } }
+});
+</script>
+{% endblock %}
