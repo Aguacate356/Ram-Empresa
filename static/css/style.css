@@ -1,0 +1,10 @@
+body { background: #f0f2f5; font-family: 'Segoe UI', sans-serif; }
+.navbar { box-shadow: 0 2px 8px rgba(0,0,0,.3); }
+.card { border-radius: 12px; }
+.card-header { border-radius: 12px 12px 0 0 !important; font-size: .95rem; }
+.table th { font-size: .82rem; text-transform: uppercase; letter-spacing: .05em; }
+.badge { font-size: .75rem; }
+.btn { border-radius: 8px; }
+.form-control, .form-select { border-radius: 8px; }
+.modal-content { border-radius: 16px; border: none; }
+.modal-header { border-radius: 16px 16px 0 0; }

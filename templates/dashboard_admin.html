@@ -1,0 +1,206 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard Admin – RAM Factory{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="fw-bold mb-0"><i class="fas fa-chart-line me-2 text-primary"></i>Dashboard Administrador</h4>
+    <span class="text-muted small"><i class="fas fa-calendar me-1"></i>{{ now if now else '' }}</span>
+</div>
+
+<!-- KPI Cards -->
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm h-100" style="border-left:4px solid #2ea043 !important;">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <p class="text-muted small mb-1">Producción Hoy</p>
+                        <h3 class="fw-bold mb-0">{{ prod_hoy }}</h3>
+                        <small class="text-muted">unidades</small>
+                    </div>
+                    <i class="fas fa-industry fa-2x text-success opacity-50"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm h-100" style="border-left:4px solid #1f6feb !important;">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <p class="text-muted small mb-1">Alertas Inventario</p>
+                        <h3 class="fw-bold mb-0">{{ alertas|length }}</h3>
+                        <small class="text-muted">materiales bajo mínimo</small>
+                    </div>
+                    <i class="fas fa-exclamation-triangle fa-2x text-warning opacity-50"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm h-100" style="border-left:4px solid #8957e5 !important;">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <p class="text-muted small mb-1">Usuarios Activos</p>
+                        <h3 class="fw-bold mb-0">{{ total_usuarios }}</h3>
+                        <small class="text-muted">en el sistema</small>
+                    </div>
+                    <i class="fas fa-users fa-2x text-purple opacity-50"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card border-0 shadow-sm h-100" style="border-left:4px solid #f78166 !important;">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <p class="text-muted small mb-1">Asistente IA</p>
+                        <h3 class="fw-bold mb-0">Claude</h3>
+                        <small class="text-muted">Anthropic Sonnet</small>
+                    </div>
+                    <i class="fas fa-robot fa-2x text-danger opacity-50"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Gráficos fila 1 -->
+<div class="row g-3 mb-4">
+    <div class="col-md-8">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-transparent border-0 fw-semibold">
+                <i class="fas fa-chart-bar me-2 text-primary"></i>Producción Últimos 7 Días
+            </div>
+            <div class="card-body"><canvas id="chartSemana" height="100"></canvas></div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-transparent border-0 fw-semibold">
+                <i class="fas fa-chart-pie me-2 text-success"></i>Top Productos (Mes)
+            </div>
+            <div class="card-body"><canvas id="chartProductos" height="180"></canvas></div>
+        </div>
+    </div>
+</div>
+
+<!-- Gráficos fila 2 -->
+<div class="row g-3 mb-4">
+    <div class="col-md-6">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-transparent border-0 fw-semibold">
+                <i class="fas fa-boxes me-2 text-warning"></i>Consumo Materia Prima (30 días)
+            </div>
+            <div class="card-body"><canvas id="chartConsumo" height="120"></canvas></div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-transparent border-0 fw-semibold">
+                <i class="fas fa-cogs me-2 text-info"></i>Eficiencia por Línea (7 días)
+            </div>
+            <div class="card-body"><canvas id="chartLineas" height="120"></canvas></div>
+        </div>
+    </div>
+</div>
+
+<!-- Alertas inventario -->
+{% if alertas %}
+<div class="row g-3">
+    <div class="col-12">
+        <div class="card border-warning border-0 shadow-sm">
+            <div class="card-header bg-warning bg-opacity-10 fw-semibold text-warning">
+                <i class="fas fa-exclamation-triangle me-2"></i>Alertas de Stock Bajo
+            </div>
+            <div class="card-body p-0">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light"><tr>
+                        <th>Material</th><th>Stock Actual</th><th>Stock Mínimo</th><th>Unidad</th><th>Estado</th>
+                    </tr></thead>
+                    <tbody>
+                    {% for a in alertas %}
+                    <tr>
+                        <td>{{ a.nombre }}</td>
+                        <td class="text-danger fw-bold">{{ a.stock_actual }}</td>
+                        <td>{{ a.stock_minimo }}</td>
+                        <td>{{ a.unidad }}</td>
+                        <td><span class="badge bg-danger">Bajo Mínimo</span></td>
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+const semanaData  = {{ prod_semana | safe }};
+const prodData    = {{ top_productos | safe }};
+const consumoData = {{ consumo_mp | safe }};
+const lineaData   = {{ eficiencia | safe }};
+
+const palette = ['#2ea043','#1f6feb','#8957e5','#f78166','#e3b341','#39d353'];
+
+// Producción semanal
+new Chart(document.getElementById('chartSemana'), {
+    type: 'bar',
+    data: {
+        labels: semanaData.map(r => r.fecha),
+        datasets: [{
+            label: 'Unidades producidas',
+            data: semanaData.map(r => r.total),
+            backgroundColor: '#1f6feb',
+            borderRadius: 6
+        }]
+    },
+    options: { plugins:{ legend:{ display:false } }, scales:{ y:{ beginAtZero:true } } }
+});
+
+// Top productos pie
+new Chart(document.getElementById('chartProductos'), {
+    type: 'doughnut',
+    data: {
+        labels: prodData.map(r => r.nombre),
+        datasets: [{ data: prodData.map(r => r.total), backgroundColor: palette }]
+    },
+    options: { plugins:{ legend:{ position:'bottom', labels:{ font:{ size:11 } } } } }
+});
+
+// Consumo materia prima
+new Chart(document.getElementById('chartConsumo'), {
+    type: 'bar',
+    data: {
+        labels: consumoData.map(r => r.nombre),
+        datasets: [{
+            label: 'Unidades consumidas',
+            data: consumoData.map(r => r.total),
+            backgroundColor: '#e3b341',
+            borderRadius: 6
+        }]
+    },
+    options: { indexAxis:'y', plugins:{ legend:{ display:false } }, scales:{ x:{ beginAtZero:true } } }
+});
+
+// Eficiencia por línea
+new Chart(document.getElementById('chartLineas'), {
+    type: 'bar',
+    data: {
+        labels: lineaData.map(r => r.nombre),
+        datasets: [{
+            label: 'Unidades',
+            data: lineaData.map(r => r.total),
+            backgroundColor: palette,
+            borderRadius: 6
+        }]
+    },
+    options: { plugins:{ legend:{ display:false } }, scales:{ y:{ beginAtZero:true } } }
+});
+</script>
+{% endblock %}
