@@ -1,0 +1,109 @@
+{% extends 'base.html' %}
+{% block title %}Producción – RAM Factory{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="fw-bold mb-0"><i class="fas fa-industry me-2 text-primary"></i>Registro de Producción</h4>
+    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalRegistrar">
+        <i class="fas fa-plus me-1"></i>Registrar Producción
+    </button>
+</div>
+
+<div class="card border-0 shadow-sm">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-dark">
+                    <tr><th>Fecha</th><th>Producto</th><th>Línea</th><th>Turno</th><th>Cantidad</th><th>Operador</th><th>Notas</th><th></th></tr>
+                </thead>
+                <tbody>
+                {% for r in registros %}
+                <tr>
+                    <td>{{ r.fecha }}</td>
+                    <td><strong>{{ r.producto }}</strong></td>
+                    <td><span class="badge bg-secondary">{{ r.linea }}</span></td>
+                    <td>
+                        {% if r.turno == 'matutino' %}<span class="badge bg-warning text-dark">☀️ Matutino</span>
+                        {% elif r.turno == 'vespertino' %}<span class="badge bg-info text-dark">🌤 Vespertino</span>
+                        {% else %}<span class="badge bg-dark">🌙 Nocturno</span>{% endif %}
+                    </td>
+                    <td><strong>{{ r.cantidad }}</strong> uds.</td>
+                    <td>{{ r.operador or '—' }}</td>
+                    <td><small class="text-muted">{{ r.notas or '' }}</small></td>
+                    <td>
+                        <form method="POST" action="{{ url_for('admin.eliminar_produccion', id=r.id) }}"
+                              class="d-inline" onsubmit="return confirm('¿Eliminar este registro?')">
+                            <button class="btn btn-sm btn-outline-danger"><i class="fas fa-trash"></i></button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Modal registrar producción -->
+<div class="modal fade" id="modalRegistrar" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title"><i class="fas fa-plus me-2"></i>Registrar Producción</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" action="{{ url_for('admin.registrar_produccion') }}">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Fecha *</label>
+                        <input type="date" name="fecha" class="form-control" required
+                               value="{{ now_date if now_date else '' }}">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Producto *</label>
+                        <select name="producto_id" class="form-select" required>
+                            {% for p in productos %}
+                            <option value="{{ p.id }}">{{ p.nombre }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Línea de Producción *</label>
+                        <select name="linea_id" class="form-select" required>
+                            {% for l in lineas %}
+                            <option value="{{ l.id }}">{{ l.nombre }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Cantidad *</label>
+                            <input type="number" name="cantidad" class="form-control" min="1" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Turno</label>
+                            <select name="turno" class="form-select">
+                                <option value="matutino">Matutino</option>
+                                <option value="vespertino">Vespertino</option>
+                                <option value="nocturno">Nocturno</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Operador</label>
+                        <input type="text" name="operador" class="form-control" placeholder="Nombre del operador">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Notas</label>
+                        <textarea name="notas" class="form-control" rows="2"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Registrar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
