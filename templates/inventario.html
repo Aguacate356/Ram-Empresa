@@ -1,0 +1,124 @@
+{% extends 'base.html' %}
+{% block title %}Inventario – RAM Factory{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="fw-bold mb-0"><i class="fas fa-boxes me-2 text-warning"></i>Control de Inventario</h4>
+    <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#modalAgregar">
+        <i class="fas fa-plus me-1"></i>Agregar Material
+    </button>
+</div>
+
+<div class="card border-0 shadow-sm">
+    <div class="card-body p-0">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-dark">
+                <tr><th>#</th><th>Material</th><th>Stock Actual</th><th>Mínimo</th><th>Unidad</th><th>Proveedor</th><th>Estado</th><th>Acciones</th></tr>
+            </thead>
+            <tbody>
+            {% for item in items %}
+            <tr>
+                <td>{{ item.id }}</td>
+                <td>
+                    <strong>{{ item.nombre }}</strong><br>
+                    <small class="text-muted">{{ item.descripcion or '' }}</small>
+                </td>
+                <td class="{{ 'text-danger fw-bold' if item.stock_actual <= item.stock_minimo else '' }}">
+                    {{ item.stock_actual }}
+                </td>
+                <td>{{ item.stock_minimo }}</td>
+                <td>{{ item.unidad }}</td>
+                <td>{{ item.proveedor or '—' }}</td>
+                <td>
+                    {% if item.stock_actual <= item.stock_minimo %}
+                    <span class="badge bg-danger"><i class="fas fa-exclamation-triangle me-1"></i>Bajo Stock</span>
+                    {% else %}
+                    <span class="badge bg-success">OK</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal"
+                        data-bs-target="#modalUpdate{{ item.id }}">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <form method="POST" action="{{ url_for('admin.eliminar_materia', id=item.id) }}"
+                          class="d-inline" onsubmit="return confirm('¿Eliminar este material?')">
+                        <button class="btn btn-sm btn-outline-danger"><i class="fas fa-trash"></i></button>
+                    </form>
+                </td>
+            </tr>
+
+            <!-- Modal actualizar stock -->
+            <div class="modal fade" id="modalUpdate{{ item.id }}" tabindex="-1">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header"><h5 class="modal-title">Actualizar: {{ item.nombre }}</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+                        <form method="POST" action="{{ url_for('admin.actualizar_stock', id=item.id) }}">
+                            <div class="modal-body">
+                                <label class="form-label">Nuevo Stock ({{ item.unidad }})</label>
+                                <input type="number" name="stock_actual" class="form-control"
+                                       value="{{ item.stock_actual }}" step="0.01" min="0" required>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                <button type="submit" class="btn btn-primary">Guardar</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Modal agregar -->
+<div class="modal fade" id="modalAgregar" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title"><i class="fas fa-plus me-2"></i>Agregar Materia Prima</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" action="{{ url_for('admin.agregar_materia') }}">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Nombre *</label>
+                        <input type="text" name="nombre" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Descripción</label>
+                        <textarea name="descripcion" class="form-control" rows="2"></textarea>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Stock Inicial *</label>
+                            <input type="number" name="stock_actual" class="form-control" step="0.01" min="0" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Stock Mínimo *</label>
+                            <input type="number" name="stock_minimo" class="form-control" step="0.01" min="0" required>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Unidad *</label>
+                            <input type="text" name="unidad" class="form-control" placeholder="chips, piezas, kg…" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Proveedor</label>
+                            <input type="text" name="proveedor" class="form-control">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-success">Agregar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
